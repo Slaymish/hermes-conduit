@@ -245,6 +245,11 @@ struct V2ConversationScreen: View {
             sidePanelIDs = appState.activeChatArtifactSessionIDs
             shownChat = currentShownChat
         }
+        .onDisappear {
+            // The return to the list, so a hitch after Back isn't read as
+            // the conversation's own.
+            ResponsivenessSignposts.signposter.emitEvent("Conversation left")
+        }
         .onChange(of: appState.activeSessionId) { _, _ in
             sidePanelIDs = appState.activeChatArtifactSessionIDs
             let shown = currentShownChat

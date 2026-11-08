@@ -714,8 +714,15 @@ struct V2Shell: View {
             .onChange(of: selectedTab) { _, tab in
                 // A marker for the device trace: the tap's frame, or the
                 // screen that asked for the tab, so an Animation Hitches
-                // track can be lined up with what the person saw.
-                ResponsivenessSignposts.signposter.emitEvent("Tab selected")
+                // track can be lined up with what the person saw. Named per
+                // destination, because two switches in a row would otherwise
+                // read the same.
+                switch tab {
+                case .bots: ResponsivenessSignposts.signposter.emitEvent("Tab selected Bots")
+                case .chats: ResponsivenessSignposts.signposter.emitEvent("Tab selected Chats")
+                case .tasks: ResponsivenessSignposts.signposter.emitEvent("Tab selected Tasks")
+                case .settings: ResponsivenessSignposts.signposter.emitEvent("Tab selected Settings")
+                }
                 visitedTabs.insert(tab)
                 giveUpRoomIfLeft()
                 // Only a tab the user picked clicks; a chat or link that
@@ -1114,10 +1121,6 @@ struct V2Shell: View {
             fromBotsPage: botsPath.last == .pulse || botsPath.last == .artifacts
         )
         appState.botChatOpeningPlaced()
-        // The push itself, before the path moves: paired with the
-        // destination's "Conversation appeared" in a device trace, and with
-        // the "Chat open" interval AppState already runs.
-        ResponsivenessSignposts.signposter.emitEvent("Chat pushed")
         switch target {
         case .bots:
             chatsPath.removeAll { $0 == .conversation }
@@ -1126,6 +1129,9 @@ struct V2Shell: View {
                 // moves to the top.
                 botsPath.removeAll { $0 == .conversation }
                 botsPath.append(.conversation)
+                // Only a real push: returning to a conversation that is
+                // already up appends nothing.
+                ResponsivenessSignposts.signposter.emitEvent("Chat pushed")
             }
         default:
             botsPath.removeAll { $0 == .conversation }
@@ -1134,6 +1140,7 @@ struct V2Shell: View {
                 // to the top instead of showing twice in the stack.
                 chatsPath.removeAll { $0 == .conversation }
                 chatsPath.append(.conversation)
+                ResponsivenessSignposts.signposter.emitEvent("Chat pushed")
             }
         }
         visitedTabs.insert(target)

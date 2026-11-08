@@ -1306,6 +1306,7 @@ struct V2ChatsView: View, Equatable {
             linksRevision: appState.voiceCallChatLinksRevision,
             profile: appState.activeProfile,
             profiles: appState.profiles,
+            dashboard: appState.activeDashboardID,
             order: appState.pinnedChatOrder,
             groupsByProfile: appState.allProfilesGroupsByProfile
         )
@@ -2726,6 +2727,9 @@ final class V2SessionsNestingCache {
         var linksRevision: Int
         var profile: String
         var profiles: [String]
+        /// Two dashboards can show the same rows with different voice tags,
+        /// so the tree is not the same tree after a switch.
+        var dashboard: UUID?
         var order: PinnedChatOrder
         var groupsByProfile: Bool
     }
